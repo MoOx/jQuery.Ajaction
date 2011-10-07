@@ -1,9 +1,17 @@
 /**
- * jAction is a simple way to apply ajax action on links or forms
+ * jQuery jAction plugin is a simple way to apply "ajax" action on links or forms,
+ * without writing specific javascript.
  *
- * Usage : $('.jAction').jAction();
+ * Usage *
  *
- * Options :
+ * $('.jAction').jAction();
+ *
+ * Options *
+ *
+ * Native jquery ajax callbacks can be passed
+ * @link http://api.jquery.com/jQuery.ajax/
+ *
+ * Server side documentation *
  *
  * From the server side, you have to send json data like this
  * {
@@ -21,10 +29,17 @@
  *  redirect: 'url to redirect'
  * }
  *
- * native jquery ajax callback can be passed
- * @link http://api.jquery.com/jQuery.ajax/
+ * You can also pass multiple reaction at once
+ * {
+ *  reactions: [
+ *      {
+ *          //see first example
+ *      },
+ *      {...}
+ *  ]
+ * }
  * 
- * @version 0.2
+ * @version 0.3
  * @author Maxime Thirouin <maxime.thirouin@gmail.com>
  */
 ;(function($) {
@@ -78,7 +93,7 @@
         var bind = function(element)
         {
             // jAction for link
-            $(element).filter('a').bind('click keyup', function(event)
+            $(element).filter('a').live('click keyup', function(event)
             {
                 var action = $(this).attr('href');
                 if (action)
@@ -119,6 +134,9 @@
             {
                 data = $(data);
             }
+
+            // @todo implement multiple actions
+            // transform simple reaction to a array if data does not contain an "reaction" array
 
             // @todo add a method which add a parser for messages (like a growl messenger like);
 
@@ -163,9 +181,9 @@
                         else
                         {
                             $newContent = $('<div />').html(data.content);
-                            var regexGetId = '/^#(.*)/';
+                            var regexGetId = /^#(.*)/;
                             var regexGetIdMatch = regexGetId.exec(data.selector)
-                            console.log('regexGetIdMatch', regexGetIdMatch);
+                            if (console) console.log('regexGetIdMatch', regexGetIdMatch);
                             if (regexGetIdMatch)
                             {
                                 $newContent.attr('id', regexGetIdMatch);
