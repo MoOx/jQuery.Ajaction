@@ -38,7 +38,9 @@
  *      {...}
  *  ]
  * }
- * 
+ *
+ * @todo add tests
+ *
  * @version 0.3
  * @author Maxime Thirouin <maxime.thirouin@gmail.com>
  */
@@ -92,8 +94,12 @@
 
         var bind = function(element)
         {
+            element = element || (self.selector);
+
+            var $element = $(element).not('[jAction]');
+
             // jAction for link
-            $(element).filter('a').live('click keyup', function(event)
+            $element.filter('a').bind('click keyup', function(event)
             {
                 var action = $(this).attr('href');
                 if (action)
@@ -110,17 +116,17 @@
                 }
                 else
                 {
-                    throw 'jAction has not found an href';
+                    throw 'jAction: no href found, jAction cannot bind anything';
                 }
-            });
+            }).attr('jAction', true); // flag as initialized
 
             // jAction for form (use jquery ajaxForm plugin)
             if ($.fn.ajaxForm)
             {
                 // @todo make this better (add more callback ?)
-                $(element).filter('form').ajaxForm({
+                $element.filter('form').ajaxForm({
                     success: reaction
-                });
+                }).attr('jAction', true); // flag as initialized;
             }
         }
 
@@ -149,8 +155,6 @@
             {
                 var $destination = $(data.selector);
                 data.action = data.action || 'remove';
-            
-                var rebind = true;
 
                 switch(data.action)
                 {
@@ -180,6 +184,7 @@
                         }
                         else
                         {
+                            // @todo test this behavior
                             $newContent = $('<div />').html(data.content);
                             var regexGetId = /^#(.*)/;
                             var regexGetIdMatch = regexGetId.exec(data.selector)
@@ -204,7 +209,6 @@
                     //used for feed
                     case 'remove':
                         $destination.hide().remove();
-                        rebind = false;
                         break;
                     default:
                         if (console) console.log('No reaction', data);
@@ -224,14 +228,11 @@
                 }
 
                 plugin.settings.reaction(data);
-
-                if (rebind)
-                {
-                    bind($destination);
-                }
             }
 
             plugin.settings.afterReaction(data);
+
+            bind(); // re bind new content
         };
 
         //plugin.fooPublicMethod = function() { }
