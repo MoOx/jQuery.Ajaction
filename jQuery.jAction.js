@@ -41,7 +41,7 @@
  *
  * @todo add tests
  *
- * @version 0.3
+ * @version 0.4
  * @author Maxime Thirouin <maxime.thirouin@gmail.com>
  */
 ;(function($) {
@@ -141,96 +141,109 @@
                 data = $(data);
             }
 
-            // @todo implement multiple actions
-            // transform simple reaction to a array if data does not contain an "reaction" array
-
-            // @todo add a method which add a parser for messages (like a growl messenger like);
-
             if (data.redirect)
             {
                 window.location.href = data.redirect;
             }
 
-            if (data.selector)
+            // transform simple reaction to a array if data does not contain a collection
+            if (!data.collection)
             {
-                var $destination = $(data.selector);
-                data.action = data.action || 'remove';
+                data = {collection: data };
+            }
+            
+            // @todo add a method which add a parser for messages (like a growl messenger like); ?
+            //if (data.messages) ;//...
 
-                switch(data.action)
+            $.each(data.collection, function(i, reaction)
+            {
+                console.log('Reaction', reaction);
+
+                if (reaction.selector)
                 {
-                    // action to replace content from the selector with new content
-                    case 'replace':
-                        if ($destination.length>0)
-                        {
-                            // check if we have html content
-                            if (!$(data.content).length)
+                    var $destination = $(reaction.selector);
+                    console.log('$destination', $destination);
+                    reaction.action = reaction.action || 'remove';
+
+                    switch(reaction.action)
+                    {
+                        // action to replace content from the selector with new content
+                        case 'replace':
+                            if ($destination.length>0)
                             {
-                                // if content "htmlized" is empty but we have already content
-                                // we assume content is just text
-                                $newContent = document.createTextNode(data.content);
+                                // check if we have html content
+                                if (!$(reaction.content).length)
+                                {
+                                    // if content "htmlized" is empty but we have already content
+                                    // we assume content is just text
+                                    $newContent = document.createTextNode(reaction.content);
+                                }
+                                else
+                                {
+                                    $newContent = $(reaction.content); // wrapp html content to transform it to an jQuery object
+                                }
+
+                                $destination
+                                    .hide()
+                                    .before($newContent)
+                                    .remove();
+
+                                $destination = $newContent;
+                                // @todo add effect for display
                             }
                             else
                             {
-                                $newContent = $(data.content); // wrapp html content to transform it to an jQuery object
+                                // @todo test this behavior
+                                $newContent = $('<div />').html(reaction.content);
+                                var regexGetId = /^#(.*)/;
+                                var regexGetIdMatch = regexGetId.exec(reaction.selector)
+                                if (console) console.log('regexGetIdMatch', regexGetIdMatch);
+                                if (regexGetIdMatch)
+                                {
+                                    $newContent.attr('id', regexGetIdMatch);
+                                }
+                                $destination = $('#'+reaction.idContent, $('#'+reaction.container).prepend($newContent));
                             }
+                            break;
 
-                            $destination
-                                .hide()
-                                .before($newContent)
-                                .remove();
+                        case 'add':
+                            reaction.action = 'prepend';
 
-                            $destination = $newContent;
-                            // @todo add effect for display
+                        case 'prepend':
+                        case 'append':
+                        case 'after':
+                        case 'before':
+                            $newContent = $(reaction.content);
+                            console.log($destination.lenth);
+                            $destination[reaction.action]($newContent);
+                            break;
+
+                        //used for feed
+                        case 'remove':
+                            $destination.hide().remove();
+                            break;
+                        default:
+                            if (console) console.log('No reaction', data);
+                    }
+
+                    // if scrollTo jQuery Plugin available
+                    if (reaction.scrollTo && $.fn.scrollToMe)
+                    {
+                        if (reaction.scrollTo === true)
+                        {
+                            $newContent.scrollToMe();
                         }
                         else
                         {
-                            // @todo test this behavior
-                            $newContent = $('<div />').html(data.content);
-                            var regexGetId = /^#(.*)/;
-                            var regexGetIdMatch = regexGetId.exec(data.selector)
-                            if (console) console.log('regexGetIdMatch', regexGetIdMatch);
-                            if (regexGetIdMatch)
-                            {
-                                $newContent.attr('id', regexGetIdMatch);
-                            }
-                            $destination = $('#'+data.idContent, $('#'+data.container).prepend($newContent));
+                            $(reaction.scrollTo).scrollToMe();
                         }
-                        break;
+                    }
 
-                    case 'add':
-                        data.action = 'prepend';
-
-                    case 'prepend':
-                    case 'append':
-                        $newContent = $(data.content);
-                        $destination[data.action]($newContent);
-                        break;
-
-                    //used for feed
-                    case 'remove':
-                        $destination.hide().remove();
-                        break;
-                    default:
-                        if (console) console.log('No reaction', data);
+                    plugin.settings.reaction(data);
                 }
 
-                // if scrollTo jQuery Plugin available
-                if (data.scrollTo && $.fn.scrollToMe)
-                {
-                    if (data.scrollTo === true)
-                    {
-                        $newContent.scrollToMe();
-                    }
-                    else
-                    {
-                        $(data.scrollTo).scrollToMe();
-                    }
-                }
-
-                plugin.settings.reaction(data);
-            }
-
-            plugin.settings.afterReaction(data);
+                plugin.settings.afterReaction(data);
+            });
 
             bind(); // re bind new content
         };
