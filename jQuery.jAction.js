@@ -18,7 +18,8 @@
  *  selector: '#mySelector', // the action will be applied on this selector
  *  action: 'replace', // available action: replace, add (==prepend), prepend, append (to 'selector') or remove (default)
  *  content: 'new (html) content', // can be html content, text, or a selector to content already in the page (eg: hidden message)
- *  parentSelector: '#myParentSelector', // used for replacement only. selector to insert content, if the 'selector' does not exist
+ *  selectorFallback: '#myParentSelector', // used for replacement only. selector to insert content, if the 'selector' does not exist
+ *  actionFallback: 'prepend, // used for replacement only. action to do , if the 'selector' does not exist
  *  scrollToSelector: true, // true to scroll to the main selector, or another selector to scroll to
  *  // not ready yet //message: 'message', // and eventual message you can pass through you messenger interface
  * }
@@ -41,7 +42,7 @@
  *
  * @todo add tests
  *
- * @version 0.4.1
+ * @version 0.5
  * @author Maxime Thirouin <maxime.thirouin@gmail.com>
  */
 ;(function($) {
@@ -134,7 +135,17 @@
         {
             plugin.settings.beforeReaction(data);
 
-            data = $.parseJSON(data);
+            try
+            {
+                data = $.parseJSON(data);
+            }
+            catch(e)
+            {
+                // @todo add a error messenger system, of error callback
+                
+                return false;
+            }
+
 
             if (typeof data == 'string')
             {
@@ -186,20 +197,12 @@
                                     .remove();
 
                                 $destination = $newContent;
+                                
                                 // @todo add effect for display
                             }
                             else
                             {
-                                // @todo test this behavior
-                                $newContent = $('<div />').html(reaction.content);
-                                var regexGetId = /^#(.*)/;
-                                var regexGetIdMatch = regexGetId.exec(reaction.selector)
-                                if (console) console.log('regexGetIdMatch', regexGetIdMatch);
-                                if (regexGetIdMatch)
-                                {
-                                    $newContent.attr('id', regexGetIdMatch);
-                                }
-                                $destination = $('#'+reaction.idContent, $('#'+reaction.container).prepend($newContent));
+                                $destination = $(reaction.selectorFallback)[reaction.actionFallback ? reaction.actionFallback : 'append'](reaction.content);
                             }
                             break;
 
