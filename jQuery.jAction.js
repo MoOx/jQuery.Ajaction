@@ -41,7 +41,7 @@
  *
  * @todo add tests
  *
- * @version 0.4
+ * @version 0.4.1
  * @author Maxime Thirouin <maxime.thirouin@gmail.com>
  */
 ;(function($) {
@@ -149,7 +149,7 @@
             // transform simple reaction to a array if data does not contain a collection
             if (!data.collection)
             {
-                data = {collection: data };
+                data = {collection: [data] };
             }
             
             // @todo add a method which add a parser for messages (like a growl messenger like); ?
@@ -157,12 +157,9 @@
 
             $.each(data.collection, function(i, reaction)
             {
-                console.log('Reaction', reaction);
-
                 if (reaction.selector)
                 {
                     var $destination = $(reaction.selector);
-                    console.log('$destination', $destination);
                     reaction.action = reaction.action || 'remove';
 
                     switch(reaction.action)
@@ -214,11 +211,11 @@
                         case 'after':
                         case 'before':
                             $newContent = $(reaction.content);
-                            console.log($destination.lenth);
                             $destination[reaction.action]($newContent);
                             break;
 
                         //used for feed
+                        case 'delete':
                         case 'remove':
                             $destination.hide().remove();
                             break;
