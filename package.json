@@ -1,0 +1,29 @@
+{
+    "name": "jquery.ajaction",
+    "version": "0.5",
+    "title": "jQuery.Ajaction()",
+    "author": {
+        "name": "Maxime Thirouin",
+        "url": "https://MoOx.github.com/"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "http://moox.mit-license.org/"
+        },
+    ],
+    "dependencies": {
+        "jquery": ">1.5"
+    },
+    "description": "A simple way to apply 'ajax' actions on links or forms, without writing specific code.",
+    "keywords": [
+        "ajax",
+        "bind"
+        "live",
+        "action"
+    ],
+    "homepage": "https://github.com/MoOx/jQuery.Ajaction",
+    "files": [
+        "jquery.ajaction.js"
+    ]
+}

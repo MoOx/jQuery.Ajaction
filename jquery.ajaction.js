@@ -1,5 +1,5 @@
 /**
- * jQuery jAction plugin is a simple way to apply "ajax" action on links or forms,
+ * jQuery jajaction plugin is a simple way to apply "ajax" actions on links or forms,
  * without writing specific javascript.
  *
  * Usage *
@@ -50,9 +50,9 @@
     $.fn.jAction = function(options)
     {
         var self = this;
-        
+
         var defaults = {
-            
+
             // jquery.ajax callback passed
             beforeSend: function(jqXHR, settings) {},
             complete: function(jqXHR, textStatus) {},
@@ -68,7 +68,7 @@
             beforeReaction: function() {},
             reaction: function() {},
             afterReaction: function() {}//,
-            
+
             /*
             effects:
             {
@@ -142,7 +142,7 @@
             catch(e)
             {
                 // @todo add a error messenger system, of error callback
-                
+
                 return false;
             }
 
@@ -162,7 +162,7 @@
             {
                 data = {collection: [data] };
             }
-            
+
             // @todo add a method which add a parser for messages (like a growl messenger like); ?
             //if (data.messages) ;//...
 
@@ -197,7 +197,7 @@
                                     .remove();
 
                                 $destination = $newContent;
-                                
+
                                 // @todo add effect for display
                             }
                             else
@@ -248,7 +248,7 @@
             bind(); // re bind new content
         };
 
-        //plugin.fooPublicMethod = function() { }
+        //plugin.fooPublicMethod = functions() { }
 
         init();
     }
