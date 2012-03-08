@@ -1,10 +1,10 @@
 /**
- * jQuery jajaction plugin is a simple way to apply "ajax" actions on links or forms,
+ * jQuery ajaction plugin is a simple way to apply "ajax" actions on links or forms,
  * without writing specific javascript.
  *
  * Usage *
  *
- * $('.jAction').jAction();
+ * $('.ajaction').ajaction();
  *
  * Options *
  *
@@ -47,7 +47,7 @@
  */
 ;(function($) {
 
-    $.fn.jAction = function(options)
+    $.fn.ajaction = function(options)
     {
         var self = this;
 
@@ -97,9 +97,9 @@
         {
             element = element || (self.selector);
 
-            var $element = $(element).not('[jAction]');
+            var $element = $(element).not('[ajaction]');
 
-            // jAction for link
+            // ajaction for link
             $element.filter('a').bind('click keyup', function(event)
             {
                 var action = $(this).attr('href');
@@ -117,17 +117,34 @@
                 }
                 else
                 {
-                    throw 'jAction: no href found, jAction cannot bind anything';
+                    throw 'ajaction: no href found, ajaction cannot bind anything';
                 }
-            }).attr('jAction', true); // flag as initialized
+            }).attr('ajaction', true); // flag as initialized
 
-            // jAction for form (use jquery ajaxForm plugin)
+            // ajaction for form (use jquery ajaxForm plugin)
             if ($.fn.ajaxForm)
             {
                 // @todo make this better (add more callback ?)
                 $element.filter('form').ajaxForm({
                     success: reaction
-                }).attr('jAction', true); // flag as initialized;
+                }).attr('ajaction', true); // flag as initialized;
+            }
+        }
+
+        var parseNewContent = function(content, html)
+        {
+            html = html || false;
+            try
+            {
+                if (!html)
+                {
+                     return document.createTextNode(content);
+                }
+                return $(content);
+            }
+            catch(e)
+            {
+                throw Exception('ajaction: reaction content is malformed.');
             }
         }
 
@@ -171,6 +188,10 @@
                 if (reaction.selector)
                 {
                     var $destination = $(reaction.selector);
+                    if (!$destination.length)
+                    {
+                        throw Exception('ajaction: destination does not exist (selector: ' + reaction.selector + ')');
+                    }
                     reaction.action = reaction.action || 'remove';
 
                     switch(reaction.action)
@@ -184,11 +205,12 @@
                                 {
                                     // if content "htmlized" is empty but we have already content
                                     // we assume content is just text
-                                    $newContent = document.createTextNode(reaction.content);
+
+                                    $newContent = parseNewContent(reaction.content, false);
                                 }
                                 else
                                 {
-                                    $newContent = $(reaction.content); // wrapp html content to transform it to an jQuery object
+                                    $newContent = parseNewContent(reaction.content); // wrapp html content to transform it to an jQuery object
                                 }
 
                                 $destination
@@ -213,7 +235,8 @@
                         case 'append':
                         case 'after':
                         case 'before':
-                            $newContent = $(reaction.content);
+                            $newContent = parseNewContent(reaction.content);
+                            console.log($newContent);
                             $destination[reaction.action]($newContent);
                             break;
 
@@ -223,7 +246,7 @@
                             $destination.hide().remove();
                             break;
                         default:
-                            if (console) console.log('No reaction', data);
+                            if (console && console.log) console.log('No reaction', reaction.action);
                     }
 
                     // if scrollTo jQuery Plugin available
@@ -238,7 +261,7 @@
                             $(reaction.scrollTo).scrollToMe();
                         }
                     }
-
+                    console.log('reaction data');
                     plugin.settings.reaction(data);
                 }
 
@@ -248,7 +271,7 @@
             bind(); // re bind new content
         };
 
-        //plugin.fooPublicMethod = functions() { }
+        //plugin.fooPublicMethod = function() { }
 
         init();
     }
